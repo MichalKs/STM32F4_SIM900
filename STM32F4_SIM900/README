@@ -1,0 +1,35 @@
+
+This project uses the STM32F4 Discovery to communicate
+with the SIM900 GSM module (with a built in sim card slot).
+
+In order to work this module needs a very robust power supply.
+It can draw up to 2A of power in short bursts (if your module
+is reseting when you plug in a SIM card - then you probably
+have a bad power supply). The wires from the regulator (I use about 3.7V)
+to the module should be as short as possible and there has to be 
+at least a 100uF electrolyte capacitor at the regulator's output.
+
+Apart from the supply pins, you only need 3 line to communicate with
+the module:
+- VBAT - power supply
+- GND - power supply ground
+- RX
+- TX
+- PWRKEY (turns the module on/off).
+
+Warning: RX and TX work at 2.8V - do not exceed this voltage or
+you may damage your module!
+Connect your TX line to SIM900_RX through a voltage divider and SIM900_TX
+to your RX through a transistor switch (warning: the current
+drawn by each digital pin cannot draw more than 10mA, so you
+can use for example 4.7k as the base resistor).
+
+PWRKEY connections (see page 24 of SIM900_Hardware Design): 
+Connect a 1k resistor to PWRKEY. The other end of the resitor
+goes to the collector of an NPN transistor switch.
+Drive the base of the switch from your uC through a 4.7k resistor.
+You can pull-down the base through a 47k resistor to GND to avoid any
+undefined states at startup.
+PWRKEY should be pulled low for at least 1s to turn the module
+ON/OFF.
+ 
