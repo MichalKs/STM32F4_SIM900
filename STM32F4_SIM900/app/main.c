@@ -73,11 +73,7 @@ int main(void) {
 
   SIM900_PutFrame("AT\r\n");
   TIMER_Delay(100);
-  SIM900_PutFrame("AT+CMGF=1\r\n");
-  TIMER_Delay(100);
-  SIM900_PutFrame("AT+CMGS=\"+YourNumberHere\"\r\n");
-  TIMER_Delay(100);
-  SIM900_PutFrame("Hello. This is your STM32\x1a\r\n");
+
 
 	while (1) {
 
@@ -89,15 +85,35 @@ int main(void) {
 
 	  // check for new frames from PC
 	  if (!COMM_GetFrame(buf, &len)) {
-	    println("Got frame of length %d: %s", (int)len, (char*)buf);
+	    println("Got frame of length %d: >%s<", (int)len, (char*)buf);
+	    hexdump(buf, len);
+	    char* tmp = strtok((char*)buf, " "); // get command
+
+	    println("Command %s", tmp);
 
 	    // control LED0 from terminal
-	    if (!strcmp((char*)buf, ":LED0 ON")) {
-	      LED_ChangeState(LED0, LED_ON);
+	    if (!strcmp((char*)tmp, ":LED0")) {
+	      tmp = strtok(0, " "); // get parameter
+	      println("Parameter %s", tmp);
+	      if(!strcmp(tmp, "ON")) {
+	        LED_ChangeState(LED0, LED_ON);
+	      } else if (!strcmp(tmp, "OFF")) {
+	        LED_ChangeState(LED0, LED_OFF);
+	      }
 	    }
-	    if (!strcmp((char*)buf, ":LED0 OFF")) {
-	      LED_ChangeState(LED0, LED_OFF);
+	    if (!strcmp((char*)tmp, ":SMS")) {
+        tmp = strtok(0, " "); // get parameter (phone number)
+        println("Parameter %s", tmp);
+        // send SMS
+        SIM900_PutFrame("AT+CMGF=1\r\n");
+        TIMER_Delay(100);
+        SIM900_PutFrame("AT+CMGS=\"+48");
+        SIM900_PutFrame(tmp);
+        SIM900_PutFrame("\"\r\n");
+        TIMER_Delay(100);
+        SIM900_PutFrame("Hello. This is your STM32.\x1a\r\n");
 	    }
+
 	  }
 
 	  if (!SIM900_GetFrame(buf, &len)) {
