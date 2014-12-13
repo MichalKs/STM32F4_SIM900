@@ -24,9 +24,12 @@
 #include <led.h>
 #include <comm.h>
 #include <keys.h>
+#include <sim900.h>
+#include <utils.h>
 
 #define SYSTICK_FREQ 1000 ///< Frequency of the SysTick set at 1kHz.
 #define COMM_BAUD_RATE 115200UL ///< Baud rate for communication with PC
+#define SIM900_BAUD_RATE 115200UL ///< Baud rate for communication with SIM900
 
 void softTimerCallback(void);
 
@@ -44,6 +47,7 @@ void softTimerCallback(void);
 int main(void) {
 	
   COMM_Init(COMM_BAUD_RATE); // initialize communication with PC
+  SIM900_Init(SIM900_BAUD_RATE);
   println("Starting program"); // Print a string to terminal
 
 	TIMER_Init(SYSTICK_FREQ); // Initialize timer
@@ -67,6 +71,14 @@ int main(void) {
   // test another way of measuring time delays
   uint32_t softTimer = TIMER_GetTime(); // get start time for delay
 
+  SIM900_PutFrame("AT\r\n");
+  TIMER_Delay(100);
+  SIM900_PutFrame("AT+CMGF=1\r\n");
+  TIMER_Delay(100);
+  SIM900_PutFrame("AT+CMGS=\"+YourNumberHere\"\r\n");
+  TIMER_Delay(100);
+  SIM900_PutFrame("Hello. This is your STM32\x1a\r\n");
+
 	while (1) {
 
 	  // test delay method
@@ -88,6 +100,12 @@ int main(void) {
 	    }
 	  }
 
+	  if (!SIM900_GetFrame(buf, &len)) {
+	    println("SIM900: length %d: %s", (int)len, (char*)buf);
+	    hexdump(buf, len);
+
+	  }
+
 		TIMER_SoftTimersUpdate(); // run timers
 		KEYS_Update(); // run keyboard
 	}
@@ -99,5 +117,6 @@ int main(void) {
 void softTimerCallback(void) {
 
   LED_Toggle(LED1); // Toggle LED
+
 
 }

@@ -49,6 +49,7 @@ void hexdump(uint8_t* buf, uint32_t length) {
       TIMER_Delay(100); // Delay so as not to overflow buffer
     }
   }
+  printf("\r\n");
 }
 
 /**

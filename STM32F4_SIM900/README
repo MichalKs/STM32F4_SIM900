@@ -22,7 +22,9 @@ you may damage your module!
 Connect your TX line to SIM900_RX through a voltage divider and SIM900_TX
 to your RX through a transistor switch (warning: the current
 drawn by each digital pin cannot draw more than 10mA, so you
-can use for example 4.7k as the base resistor).
+can use for example 4.7k as the base resistor). (Actually, you can
+connect SIM900_TX directly to your RX on 3.3V uC like STM32 - 
+they will recognize a high state on 2.8V).
 
 PWRKEY connections (see page 24 of SIM900_Hardware Design): 
 Connect a 1k resistor to PWRKEY. The other end of the resitor
@@ -32,4 +34,10 @@ You can pull-down the base through a 47k resistor to GND to avoid any
 undefined states at startup.
 PWRKEY should be pulled low for at least 1s to turn the module
 ON/OFF.
+
+To turn off echo mode permanently you have to issue the following
+command: "ATE0&W", which writes this setting to nonvolatile memory.
+
+
+
  
